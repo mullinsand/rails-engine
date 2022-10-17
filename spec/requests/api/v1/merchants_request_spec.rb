@@ -42,8 +42,8 @@ describe 'Merchants API' do
       expect(response).to be_successful
       expect(json[:data]).to be_a(Hash)
 
-      expect(json[:data]).to have_key(:name)
-      expect(json[:data][:name]).to eq(merchant1.name)
+      expect(json[:data][:attributes]).to have_key(:name)
+      expect(json[:data][:attributes][:name]).to eq(merchant1.name)
 
     end
 
@@ -55,10 +55,10 @@ describe 'Merchants API' do
     end
 
     context 'if there are no merchants with that id' do
-      it 'returns an empty array' do
+      it 'returns a 404 status response' do
         get '/api/v1/merchants/24'
 
-        expect(response).to eq(404)
+        expect(response).to have_http_status(404)
       end
     end
   end
