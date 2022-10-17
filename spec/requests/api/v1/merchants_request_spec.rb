@@ -62,4 +62,51 @@ describe 'Merchants API' do
       end
     end
   end
+
+  describe 'Get All Merchants items' do
+    it 'sends a list of merchants items' do
+      merchant1 = create(:merchant, name: "Bob")
+
+      create_list(:item, 3, merchant: merchant1)
+
+      get "/api/v1/merchants/#{merchant1.id}/items"
+      expect(response).to be_successful
+      expect(json[:data].count).to eq(3)
+
+      json[:data].each do |item|
+        # expect(merchant).to have_key(:id)
+        # expect(merchant[:id]).to be_an(Integer)
+
+        expect(item[:attributes]).to have_key(:name)
+        expect(item[:attributes][:name]).to be_a(String)
+
+        expect(item[:attributes]).to have_key(:name)
+        expect(item[:attributes][:description]).to be_a(String)
+
+        expect(item[:attributes]).to have_key(:name)
+        expect(item[:attributes][:unit_price]).to be_a(Integer)
+
+        expect(item[:attributes]).to have_key(:name)
+        expect(item[:attributes][:merchant_id]).to eq(merchant1.id)
+      end
+    end
+
+    xit 'returns status code 200' do
+      merchant1 = create(:merchant, name: "Bob")
+
+      create_list(:items, 3, merchant: merchant1)
+
+      get "/api/v1/merchants/#{merchant1.id}/items"
+
+      expect(response).to have_http_status(200)
+    end
+
+    context 'if merchant has no items' do
+      xit 'returns an empty array' do
+        get "/api/v1/merchants/#{merchant1.id}/items"
+
+        expect(json[:data]).to eq([])
+      end
+    end
+  end
 end
