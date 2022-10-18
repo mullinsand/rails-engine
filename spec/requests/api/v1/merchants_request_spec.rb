@@ -121,4 +121,39 @@ describe 'Merchants API' do
       end
     end
   end
+
+  # describe 'Search for Merchant by name' do
+  #   it 'makes a list of merchants whose names match a string' do
+  #     create(:merchant, name: "Fred")
+  #     create(:merchant, name: "Ted")
+  #     create_list(:merchant, 4, name: "Bob")
+
+  #     get '/api/v1/merchants'
+  #     expect(response).to be_successful
+
+  #     expect(json[:data].count).to eq(3)
+
+  #     json[:data].each do |merchant|
+  #       # expect(merchant).to have_key(:id)
+  #       # expect(merchant[:id]).to be_an(Integer)
+
+  #       expect(merchant[:attributes]).to have_key(:name)
+  #       expect(merchant[:attributes][:name]).to be_a(String)
+  #     end
+  #   end
+
+  #   it 'returns status code 200' do
+  #     get '/api/v1/merchants'
+
+  #     expect(response).to have_http_status(200)
+  #   end
+
+  #   context 'if there are no merchants' do
+  #     it 'returns an empty array' do
+  #       get '/api/v1/merchants'
+
+  #       expect(json[:data]).to eq([])
+  #     end
+  #   end
+  # end
 end
