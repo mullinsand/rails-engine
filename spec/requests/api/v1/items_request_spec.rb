@@ -221,7 +221,7 @@ describe 'Items API' do
 
       expect { delete "/api/v1/items/#{bad_item.id}" }.to change(Item, :count).by(-1)
 
-      expect(response).to be_success
+      expect(response).to be_successful
       expect { Item.find(bad_item.id) }.to raise_error(ActiveRecord::RecordNotFound)
     end
 
@@ -247,15 +247,15 @@ describe 'Items API' do
       get "/api/v1/items/find?name=#{search_name}"
 
       expect(response).to be_successful
-      require 'pry'; binding.pry
+
       item = json[:data]
       expect(item).to be_a(Hash)
       expect(item).to have_key(:id)
       # expect(item[:attributes][:id]).to be_an(Integer)
 
       expect(item[:attributes]).to have_key(:name)
-      expect(item[:attributes][:name]).to be_a(cool_item.name)
-      expect(item[:attributes][:name]).to_not be_a(not_cool_item.name)
+      expect(item[:attributes][:name]).to eq(cool_item.name)
+      expect(item[:attributes][:name]).to_not eq(not_cool_item.name)
 
       expect(item[:attributes]).to have_key(:description)
       expect(item[:attributes][:description]).to be_a(String)
@@ -267,12 +267,154 @@ describe 'Items API' do
       expect(item[:attributes][:merchant_id]).to be_an(Integer)
     end
 
-    context 'if item does not exist' do  
-      it 'returns a 404 status response' do
+    context 'if item search returns no results' do  
+      it 'returns a an empty array' do
   
-        delete "/api/v1/items/100"
+        cool_item = create(:item, name: "rings")
+        create_list(:item, 3, name: "shoes")
+        not_cool_item = create(:item, name: "springs")
+        search_name = "fire"
+  
+        get "/api/v1/items/find?name=#{search_name}"
 
-        expect(response).to have_http_status(404)
+        expect(response).to be_successful
+
+        expect(json[:data]).to eq([])
+      end
+    end
+  end
+
+  describe 'min/max item price search' do
+    describe 'min item price search' do
+      it 'find an item based on min search params results in alpha order' do
+        cool_item = create(:item, name: "Andrew's thing", unit_price: "5000")
+        create_list(:item, 3, name: "freds things", unit_price: "10000")
+        not_cool_item = create(:item, name: "Aaron's thing", unit_price: "4999")
+        search_unit_price = "50.00"
+
+        get "/api/v1/items/find?min_price=#{search_unit_price}"
+
+        expect(response).to be_successful
+
+        item = json[:data]
+        expect(item).to be_a(Hash)
+        expect(item).to have_key(:id)
+        # expect(item[:attributes][:id]).to be_an(Integer)
+
+        expect(item[:attributes]).to have_key(:name)
+        expect(item[:attributes][:name]).to eq(cool_item.name)
+        expect(item[:attributes][:name]).to_not eq(not_cool_item.name)
+
+        expect(item[:attributes]).to have_key(:description)
+        expect(item[:attributes][:description]).to be_a(String)
+
+        expect(item[:attributes]).to have_key(:unit_price)
+        expect(item[:attributes][:unit_price]).to be_a(Float)
+
+        expect(item[:attributes]).to have_key(:merchant_id)
+        expect(item[:attributes][:merchant_id]).to be_an(Integer)
+      end
+
+      context 'if item search returns no results' do  
+        it 'returns a an empty array' do
+  
+          search_unit_price = "50.00"
+  
+          get "/api/v1/items/find?min_price=#{search_unit_price}"
+  
+          expect(response).to be_successful
+  
+          expect(json[:data]).to eq([])
+        end
+      end
+    end
+
+    describe 'max item price search' do
+      it 'find an item based on max search params results in alpha order' do
+        cool_item = create(:item, name: "Andrew's thing", unit_price: "4999")
+        create_list(:item, 3, name: "freds things", unit_price: "4000")
+        not_cool_item = create(:item, name: "Aaron's thing", unit_price: "5001")
+        search_unit_price = "50.00"
+
+        get "/api/v1/items/find?max_price=#{search_unit_price}"
+
+        expect(response).to be_successful
+
+        item = json[:data]
+        expect(item).to be_a(Hash)
+        expect(item).to have_key(:id)
+        # expect(item[:attributes][:id]).to be_an(Integer)
+
+        expect(item[:attributes]).to have_key(:name)
+        expect(item[:attributes][:name]).to eq(cool_item.name)
+        expect(item[:attributes][:name]).to_not eq(not_cool_item.name)
+
+        expect(item[:attributes]).to have_key(:description)
+        expect(item[:attributes][:description]).to be_a(String)
+
+        expect(item[:attributes]).to have_key(:unit_price)
+        expect(item[:attributes][:unit_price]).to be_a(Float)
+
+        expect(item[:attributes]).to have_key(:merchant_id)
+        expect(item[:attributes][:merchant_id]).to be_an(Integer)
+      end
+
+      context 'if item search returns no results' do  
+        it 'returns a an empty array' do
+  
+          search_unit_price = "50.00"
+  
+          get "/api/v1/items/find?max_price=#{search_unit_price}"
+  
+          expect(response).to be_successful
+  
+          expect(json[:data]).to eq([])
+        end
+      end
+    end
+
+    describe 'max/min item price search' do
+      it 'find an item based on max and min search params results in alpha order' do
+        cool_item = create(:item, name: "Andrew's thing", unit_price: "5000")
+        create_list(:item, 3, name: "freds things", unit_price: "5000")
+        not_cool_item = create(:item, name: "Aaron's thing", unit_price: "5002")
+        search_min_unit_price = "50.00"
+        search_max_unit_price = "50.00"
+
+        get "/api/v1/items/find?max_price=#{search_max_unit_price}&min_price=#{search_min_unit_price}"
+
+        expect(response).to be_successful
+
+        item = json[:data]
+        expect(item).to be_a(Hash)
+        expect(item).to have_key(:id)
+        # expect(item[:attributes][:id]).to be_an(Integer)
+
+        expect(item[:attributes]).to have_key(:name)
+        expect(item[:attributes][:name]).to eq(cool_item.name)
+        expect(item[:attributes][:name]).to_not eq(not_cool_item.name)
+
+        expect(item[:attributes]).to have_key(:description)
+        expect(item[:attributes][:description]).to be_a(String)
+
+        expect(item[:attributes]).to have_key(:unit_price)
+        expect(item[:attributes][:unit_price]).to be_a(Float)
+
+        expect(item[:attributes]).to have_key(:merchant_id)
+        expect(item[:attributes][:merchant_id]).to be_an(Integer)
+      end
+
+      context 'if item search returns no results' do  
+        it 'returns a an empty array' do
+  
+          search_unit_price = "50.00"
+  
+          get "/api/v1/items/find?max_price=#{search_unit_price}"
+  
+          expect(response).to be_successful
+  
+          expect(json[:data]).to eq([])
+        end
       end
     end
   end
