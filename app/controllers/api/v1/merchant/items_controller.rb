@@ -4,8 +4,4 @@ class Api::V1::Merchant::ItemsController < ApplicationController
     Merchant.find(params[:merchant_id])
     render json: ItemSerializer.new(Item.where(merchant_id: params[:merchant_id]))
   end
-
-  # def show
-  #   render json: MerchantSerializer.new(Merchant.find(params[:id]))
-  # end
 end
