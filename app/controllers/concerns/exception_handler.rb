@@ -13,7 +13,7 @@ module ExceptionHandler
   end
 
   def negative_number_error
-    render json: { error: 'Prices must be greater than or equal to zero' }, status: 500
+    render json: { error: 'Prices must be greater than or equal to zero' }, status: 400
   end
 
   def name_and_price_error
@@ -22,5 +22,9 @@ module ExceptionHandler
 
   def empty_params_error
     render json: { error: 'No params listed in search' }, status: 400
+  end
+
+  def no_search_results
+    render json: { data: { message: 'No results matched your search'}}, status: 200
   end
 end

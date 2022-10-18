@@ -268,7 +268,7 @@ describe 'Items API' do
     end
 
     context 'if item search returns no results' do  
-      it 'returns a an empty array' do
+      it 'returns an empty array' do
   
         cool_item = create(:item, name: "rings")
         create_list(:item, 3, name: "shoes")
@@ -279,7 +279,7 @@ describe 'Items API' do
 
         expect(response).to be_successful
 
-        expect(json[:data]).to eq([])
+        expect(json[:data][:message]).to eq('No results matched your search')
       end
     end
   end
@@ -287,9 +287,9 @@ describe 'Items API' do
   describe 'min/max item price search' do
     describe 'min item price search' do
       it 'find an item based on min search params results in alpha order' do
-        cool_item = create(:item, name: "Andrew's thing", unit_price: "5000")
-        create_list(:item, 3, name: "freds things", unit_price: "10000")
-        not_cool_item = create(:item, name: "Aaron's thing", unit_price: "4999")
+        cool_item = create(:item, name: "Andrew's thing", unit_price: "50.00")
+        create_list(:item, 3, name: "freds things", unit_price: "100.00")
+        not_cool_item = create(:item, name: "Aaron's thing", unit_price: "49.99")
         search_unit_price = "50.00"
 
         get "/api/v1/items/find?min_price=#{search_unit_price}"
@@ -324,16 +324,17 @@ describe 'Items API' do
   
           expect(response).to be_successful
   
-          expect(json[:data]).to eq([])
+          expect(json[:data][:message]).to eq('No results matched your search')
+
         end
       end
     end
 
     describe 'max item price search' do
       it 'find an item based on max search params results in alpha order' do
-        cool_item = create(:item, name: "Andrew's thing", unit_price: "4999")
-        create_list(:item, 3, name: "freds things", unit_price: "4000")
-        not_cool_item = create(:item, name: "Aaron's thing", unit_price: "5001")
+        cool_item = create(:item, name: "Andrew's thing", unit_price: "49.99")
+        create_list(:item, 3, name: "freds things", unit_price: "40.00")
+        not_cool_item = create(:item, name: "Aaron's thing", unit_price: "50.01")
         search_unit_price = "50.00"
 
         get "/api/v1/items/find?max_price=#{search_unit_price}"
@@ -368,16 +369,16 @@ describe 'Items API' do
   
           expect(response).to be_successful
   
-          expect(json[:data]).to eq([])
+          expect(json[:data][:message]).to eq('No results matched your search')
         end
       end
     end
 
     describe 'max/min item price search' do
       it 'find an item based on max and min search params results in alpha order' do
-        cool_item = create(:item, name: "Andrew's thing", unit_price: "5000")
-        create_list(:item, 3, name: "freds things", unit_price: "5000")
-        not_cool_item = create(:item, name: "Aaron's thing", unit_price: "5002")
+        cool_item = create(:item, name: "Andrew's thing", unit_price: "50.00")
+        create_list(:item, 3, name: "freds things", unit_price: "50.00")
+        not_cool_item = create(:item, name: "Aaron's thing", unit_price: "50.02")
         search_min_unit_price = "50.00"
         search_max_unit_price = "50.00"
 
@@ -410,10 +411,34 @@ describe 'Items API' do
           search_unit_price = "50.00"
   
           get "/api/v1/items/find?max_price=#{search_unit_price}"
-  
+
           expect(response).to be_successful
   
-          expect(json[:data]).to eq([])
+          expect(json[:data][:message]).to eq('No results matched your search')
+        end
+      end
+
+      context 'if min/max price are negative' do  
+        it 'returns an error message' do
+  
+          search_unit_price = "-50.00"
+  
+          get "/api/v1/items/find?max_price=#{search_unit_price}"
+
+          expect(response.status).to eq(400)
+          expect(json[:error]).to eq('Prices must be greater than or equal to zero')
+        end
+      end
+
+      context 'if min/max price are not present' do  
+        it 'returns an error message' do
+  
+          search_unit_price = ""
+  
+          get "/api/v1/items/find?max_price=#{search_unit_price}"
+
+          expect(response.status).to eq(400)
+          expect(json[:error]).to eq('No params listed in search')
         end
       end
     end
