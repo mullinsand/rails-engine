@@ -224,5 +224,56 @@ describe 'Items API' do
       expect(response).to be_success
       expect { Item.find(bad_item.id) }.to raise_error(ActiveRecord::RecordNotFound)
     end
+
+    context 'if item does not exist' do  
+      it 'returns a 404 status response' do
+  
+        delete "/api/v1/items/100"
+
+        expect(response).to have_http_status(404)
+      end
+    end
+  end
+
+
+
+  describe 'single item search' do
+    it 'find an item based on name search params results in alpha order' do
+      cool_item = create(:item, name: "rings")
+      create_list(:item, 3, name: "shoes")
+      not_cool_item = create(:item, name: "springs")
+      search_name = "ring"
+
+      get "/api/v1/items/find?name=#{search_name}"
+
+      expect(response).to be_successful
+      require 'pry'; binding.pry
+      item = json[:data]
+      expect(item).to be_a(Hash)
+      expect(item).to have_key(:id)
+      # expect(item[:attributes][:id]).to be_an(Integer)
+
+      expect(item[:attributes]).to have_key(:name)
+      expect(item[:attributes][:name]).to be_a(cool_item.name)
+      expect(item[:attributes][:name]).to_not be_a(not_cool_item.name)
+
+      expect(item[:attributes]).to have_key(:description)
+      expect(item[:attributes][:description]).to be_a(String)
+
+      expect(item[:attributes]).to have_key(:unit_price)
+      expect(item[:attributes][:unit_price]).to be_a(Float)
+
+      expect(item[:attributes]).to have_key(:merchant_id)
+      expect(item[:attributes][:merchant_id]).to be_an(Integer)
+    end
+
+    context 'if item does not exist' do  
+      it 'returns a 404 status response' do
+  
+        delete "/api/v1/items/100"
+
+        expect(response).to have_http_status(404)
+      end
+    end
   end
 end

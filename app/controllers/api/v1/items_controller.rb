@@ -21,6 +21,20 @@ class Api::V1::ItemsController < ApplicationController
     render json: ::Item.delete(params[:id])
   end
 
+  def find
+    if params[:name] && (params[:min_price] || params[:max_price])
+      #error
+    elsif params[:name]
+      item = Item.find_by_name(params[:name])
+      render api_v1_item_path(item)
+    elsif params[:min_price] && params[:max_price]
+    
+    elsif params[:min_price]
+
+    elsif params[:max_price]
+    
+    end
+  end
   private
 
   def item_params
