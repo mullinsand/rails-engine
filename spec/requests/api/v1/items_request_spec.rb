@@ -245,6 +245,28 @@ describe 'Items API' do
       expect { Item.find(bad_item.id) }.to raise_error(ActiveRecord::RecordNotFound)
     end
 
+    it 'deletes any invoices that that item is the only item on' do
+      item1 = create(:item)
+      invoice1 = create(:invoice)
+      invoice2 = create(:invoice)
+      invoice3 = create(:invoice)
+      invoice4 = create(:invoice)
+
+
+      create(:invoice_item, item: item1, invoice: invoice1)
+      create(:invoice_item, item: item1, invoice: invoice2)
+      create(:invoice_item, item: item1, invoice: invoice3)
+      create(:invoice_item, item: item1, invoice: invoice4)
+      create_list(:invoice_item, 2, invoice: invoice2)
+
+      delete "/api/v1/items/#{item1.id}"
+
+      expect(Invoice.all).to include(invoice2)
+      expect(Invoice.all).to_not include(invoice1)
+      expect(Invoice.all).to_not include(invoice3)
+      expect(Invoice.all).to_not include(invoice4)
+    end
+
     context 'if item does not exist' do  
       it 'returns a 404 status response' do
   

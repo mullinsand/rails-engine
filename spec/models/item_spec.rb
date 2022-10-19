@@ -10,6 +10,8 @@ RSpec.describe Item, type: :model do
 
   describe 'relationships' do
     it { should belong_to :merchant }
+    it { should have_many :invoice_items }
+    it { should have_many(:invoices).through(:invoice_items) }
   end
   
   describe 'class methods' do
@@ -237,6 +239,65 @@ RSpec.describe Item, type: :model do
           min_price = nil
 
           expect(Item.negative_prices?(min_price, max_price)).to eq(false)
+        end
+      end
+    end
+
+    describe 'find_only_item_invoices(params[:id])' do
+      describe 'finds all invoices that only have that item on the invoice' do
+        context 'item is only item on an invoice' do
+          it 'returns that invoice id in array named invoices' do
+            item1 = create(:item)
+            invoice1 = create(:invoice)
+            invoice2 = create(:invoice)
+
+            create(:invoice_item, item: item1, invoice: invoice1)
+            create(:invoice_item, item: item1, invoice: invoice2)
+            create_list(:invoice_item, 2, invoice: invoice2)
+
+            expect(Item.find_only_item_invoices(item1.id)).to eq([invoice1.id])
+            expect(Item.find_only_item_invoices(item1.id)).to_not include(invoice2.id)
+          end
+        end
+
+        context 'item is only item on multiple invoices' do
+          it 'returns that invoice id in array named invoices' do
+            item1 = create(:item)
+            invoice1 = create(:invoice)
+            invoice2 = create(:invoice)
+            invoice3 = create(:invoice)
+            invoice4 = create(:invoice)
+
+
+            create(:invoice_item, item: item1, invoice: invoice1)
+            create(:invoice_item, item: item1, invoice: invoice2)
+            create(:invoice_item, item: item1, invoice: invoice3)
+            create(:invoice_item, item: item1, invoice: invoice4)
+            create_list(:invoice_item, 2, invoice: invoice2)
+
+            expect(Item.find_only_item_invoices(item1.id)).to eq([invoice1.id, invoice3.id, invoice4.id])
+            expect(Item.find_only_item_invoices(item1.id)).to_not include(invoice2.id)
+          end
+        end
+
+        context 'item has no invoices it is the only item on' do
+          it 'returns an empty array' do
+            item1 = create(:item)
+            invoice2 = create(:invoice)
+
+            create(:invoice_item, item: item1, invoice: invoice2)
+            create_list(:invoice_item, 2, invoice: invoice2)
+
+            expect(Item.find_only_item_invoices(item1.id)).to eq([])
+          end
+        end
+
+        context 'item has no invoices' do
+          it 'returns an empty array' do
+            item1 = create(:item)
+
+            expect(Item.find_only_item_invoices(item1.id)).to eq([])
+          end
         end
       end
     end
