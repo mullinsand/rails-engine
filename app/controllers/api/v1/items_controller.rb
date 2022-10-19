@@ -28,12 +28,10 @@ class Api::V1::ItemsController < ApplicationController
       item = ::Item.find_by_name(params[:name])
       item ? (render json: ItemSerializer.new(item)) : no_search_results
     elsif params_present?(params[:min_price], params[:max_price])
-      if ::Item.negative_prices?(params[:min_price], params[:max_price])
-        negative_number_error
-      else
-        item = ::Item.find_by_price(params[:min_price], params[:max_price])
-        item ? (render json: ItemSerializer.new(item)) : no_search_results
-      end
+      return negative_number_error if ::Item.negative_prices?(params[:min_price], params[:max_price])
+
+      item = ::Item.find_by_price(params[:min_price], params[:max_price])
+      item ? (render json: ItemSerializer.new(item)) : no_search_results
     else
       empty_params_error
     end

@@ -268,7 +268,7 @@ describe 'Items API' do
     end
 
     context 'if item search returns no results' do  
-      it 'returns an empty array' do
+      it 'returns a 200 with a message' do
   
         cool_item = create(:item, name: "rings")
         create_list(:item, 3, name: "shoes")
@@ -316,7 +316,7 @@ describe 'Items API' do
       end
 
       context 'if item search returns no results' do  
-        it 'returns a an empty array' do
+        it 'returns a 200 with a message' do
   
           search_unit_price = "50.00"
   
@@ -361,7 +361,7 @@ describe 'Items API' do
       end
 
       context 'if item search returns no results' do  
-        it 'returns a an empty array' do
+        it 'returns a 200 with a message' do
   
           search_unit_price = "50.00"
   
@@ -406,7 +406,7 @@ describe 'Items API' do
       end
 
       context 'if item search returns no results' do  
-        it 'returns a an empty array' do
+        it 'returns a 200 with a message' do
   
           search_min_unit_price = "50.00"
           search_max_unit_price = "50.00"
