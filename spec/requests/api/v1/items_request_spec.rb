@@ -408,9 +408,10 @@ describe 'Items API' do
       context 'if item search returns no results' do  
         it 'returns a an empty array' do
   
-          search_unit_price = "50.00"
+          search_min_unit_price = "50.00"
+          search_max_unit_price = "50.00"
   
-          get "/api/v1/items/find?max_price=#{search_unit_price}"
+          get "/api/v1/items/find?max_price=#{search_max_unit_price}&min_price=#{search_min_unit_price}"
 
           expect(response).to be_successful
   
@@ -426,7 +427,7 @@ describe 'Items API' do
           get "/api/v1/items/find?max_price=#{search_unit_price}"
 
           expect(response.status).to eq(400)
-          expect(json[:error]).to eq('Prices must be greater than or equal to zero')
+          expect(json[:errors]).to eq('Prices must be greater than or equal to zero')
         end
       end
 
@@ -438,7 +439,7 @@ describe 'Items API' do
           get "/api/v1/items/find?max_price=#{search_unit_price}"
 
           expect(response.status).to eq(400)
-          expect(json[:error]).to eq('No params listed in search')
+          expect(json[:errors]).to eq('No params listed in search')
         end
       end
     end
