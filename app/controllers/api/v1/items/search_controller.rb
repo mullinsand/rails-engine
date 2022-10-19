@@ -1,5 +1,6 @@
 class Api::V1::Items::SearchController < ApplicationController
   include ExceptionHandler
+
   def find
     if params[:name] && (params[:min_price] || params[:max_price])
       name_and_price_error
