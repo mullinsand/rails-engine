@@ -122,7 +122,7 @@ describe 'Merchants API' do
     end
   end
 
-  describe 'Search for Merchant by name' do
+  describe 'Search for all Merchants by name' do
     it 'makes a list of merchants whose names match a string' do
       create(:merchant, name: "Fred")
       create(:merchant, name: "Ted")
@@ -173,6 +173,65 @@ describe 'Merchants API' do
       it 'returns an empty array' do
         name_search = "ed"
         get "/api/v1/merchants/find_all?"
+
+        expect(response.status).to eq(400)
+        expect(json[:errors]).to eq('No params listed in search')
+      end
+    end
+  end
+
+  describe 'Search for one Merchant by name' do
+    it 'makes a list of merchants whose names match a string' do
+      merchant1 = create(:merchant, name: "Fred")
+      create(:merchant, name: "Ted")
+      create_list(:merchant, 4, name: "Bob")
+      name_search = "ed"
+      get "/api/v1/merchants/find?name=#{name_search}"
+      expect(response).to be_successful
+
+      merchant = json[:data]
+      expect(merchant).to be_a(Hash)
+      expect(merchant).to have_key(:id)
+      expect(merchant[:attributes]).to have_key(:name)
+      expect(merchant[:attributes][:name]).to eq(merchant1.name)
+
+        # expect(merchant).to have_key(:id)
+        # expect(merchant[:id]).to be_an(Integer)
+    end
+
+    it 'returns status code 200' do
+      create(:merchant, name: "Fred")
+      create(:merchant, name: "Ted")
+      create_list(:merchant, 4, name: "Bob")
+      name_search = "ed"
+      get "/api/v1/merchants/find?name=#{name_search}"
+
+      expect(response).to have_http_status(200)
+    end
+
+    context 'if there are no merchants' do
+      it 'returns a 200 with a message' do
+        name_search = "ed"
+        get "/api/v1/merchants/find?name=#{name_search}"
+
+        expect(response).to be_successful
+
+        expect(json[:data][:message]).to eq('No results matched your search')
+      end
+    end
+
+    context 'if search params are empty' do
+      it 'returns an empty array' do
+        name_search = "ed"
+        get "/api/v1/merchants/find?name="
+
+        expect(response.status).to eq(400)
+        expect(json[:errors]).to eq('No params listed in search')
+      end
+
+      it 'returns an empty array' do
+        name_search = "ed"
+        get "/api/v1/merchants/find?"
 
         expect(response.status).to eq(400)
         expect(json[:errors]).to eq('No params listed in search')
