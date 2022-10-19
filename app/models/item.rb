@@ -4,7 +4,7 @@ class Item < ApplicationRecord
   validates_presence_of :unit_price
   validates_presence_of :merchant_id
 
-  around_destroy :delete_only_item_invoices, prepend: true
+  around_destroy :delete_only_item_invoices
 
   belongs_to :merchant
   has_many :invoice_items, dependent: :destroy
@@ -30,7 +30,7 @@ class Item < ApplicationRecord
   end
 
   def self.find_only_item_invoices(item_id)
-    @invoice_ids = find(item_id)
+    find(item_id)
       .invoices
       .joins(:invoice_items)
       .select('invoices.id, count(invoice_items.invoice_id = invoices.id) as item_count')
@@ -38,6 +38,8 @@ class Item < ApplicationRecord
       .having('count(invoice_items.invoice_id = invoices.id) = 1')
       .pluck(:id)
   end
+
+  private
 
   def delete_only_item_invoices
     only_item_invoices = Item.find_only_item_invoices(id)
