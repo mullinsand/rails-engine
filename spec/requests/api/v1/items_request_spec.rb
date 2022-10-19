@@ -170,6 +170,25 @@ describe 'Items API' do
 
       expect(response).to have_http_status(201)
     end
+
+    # context 'attributes missing' do
+    #   it 'returns a 400 and error message' do
+    #     merchant1 = create(:merchant)
+
+    #     item_params = ({
+    #       name: "thing",
+    #       description: "the best thing eva",
+    #       merchant_id: merchant1.id
+    #     })
+    #     headers = {"CONTENT_TYPE" => "application/json"}
+
+    #     post '/api/v1/items', headers: headers, params: JSON.generate(item: item_params)
+
+    #     expect(response).to have_http_status(400)
+    #     require 'pry'; binding.pry
+    #     expect(json[:errors]).to eq('No results matched your search')
+    #   end
+    # end
   end
 
 
