@@ -614,6 +614,19 @@ describe 'Items API' do
           expect(json[:errors]).to eq('Name and price cannot be used on the same request')
         end
       end
+
+      context 'if min is greater than max' do  
+        it 'returns an error message' do
+  
+          search_min_unit_price = "50.00"
+          search_max_unit_price = "49.99"
+  
+          get "/api/v1/items/find_all?max_price=#{search_max_unit_price}&min_price=#{search_min_unit_price}"
+
+          expect(response.status).to eq(400)
+          expect(json[:errors]).to eq('Price minimum must be greater than maximum')
+        end
+      end
     end
 
     describe 'max/min item price search all' do
