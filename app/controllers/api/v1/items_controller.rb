@@ -1,6 +1,5 @@
 class Api::V1::ItemsController < ApplicationController
   include ExceptionHandler
-  # before_destroy :delete_only_item_invoices
 
   def index
     render json: ItemSerializer.new(Item.all)
@@ -20,7 +19,7 @@ class Api::V1::ItemsController < ApplicationController
 
   def destroy
     Item.find(params[:id])
-    render json: Item.delete(params[:id])
+    render json: Item.destroy(params[:id])
   end
 
   private
@@ -29,11 +28,4 @@ class Api::V1::ItemsController < ApplicationController
     Merchant.find(params[:merchant_id]) if params[:merchant_id]
     params.require(:item).permit(:name, :description, :unit_price, :merchant_id)
   end
-
-  # def delete_only_item_invoices
-  #   only_item_invoice_items = Item.find_only_item_invoice_items(params[:id])
-  #   only_item_invoices = Item.find_only_item_invoices(params[:id])
-  #   InvoiceItem.delete(only_item_invoice_items.map { |Ii| Ii.id }) unless only_item_invoice_items.empty?
-  #   Invoice.delete(only_item_invoices {}) unless only_item_invoices.empty?
-  # end
 end
