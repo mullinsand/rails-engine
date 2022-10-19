@@ -27,4 +27,8 @@ module ExceptionHandler
   def no_search_results
     render json: { data: { message: 'No results matched your search'}}, status: 200
   end
+
+  def min_greater_than_max
+    render json: { errors: 'Price minimum must be greater than maximum' }, status: 400
+  end
 end
