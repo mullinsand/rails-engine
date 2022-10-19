@@ -235,8 +235,6 @@ describe 'Items API' do
     end
   end
 
-
-
   describe 'single item search' do
     it 'find an item based on name search params results in alpha order' do
       cool_item = create(:item, name: "rings")
@@ -284,9 +282,57 @@ describe 'Items API' do
     end
   end
 
+  describe 'all item search' do
+    it 'find all items based on name search params results in alpha order' do
+      cool_item = create(:item, name: "rings")
+      create_list(:item, 3, name: "shoes")
+      not_cool_item = create(:item, name: "springs")
+      search_name = "ring"
+
+      get "/api/v1/items/find_all?name=#{search_name}"
+
+      expect(response).to be_successful
+      expect(json[:data].count).to eq(2)
+      json[:data].each do |item|
+        expect(item).to be_a(Hash)
+        expect(item).to have_key(:id)
+        # expect(item[:attributes][:id]).to be_an(Integer)
+
+        expect(item[:attributes]).to have_key(:name)
+        expect(item[:attributes][:name]).to be_a(String)
+        expect(item[:attributes][:name]).to_not eq('shoes')
+
+        expect(item[:attributes]).to have_key(:description)
+        expect(item[:attributes][:description]).to be_a(String)
+
+        expect(item[:attributes]).to have_key(:unit_price)
+        expect(item[:attributes][:unit_price]).to be_a(Float)
+
+        expect(item[:attributes]).to have_key(:merchant_id)
+        expect(item[:attributes][:merchant_id]).to be_an(Integer)
+      end
+    end
+
+    context 'if item search returns no results' do  
+      it 'returns a 200 with a message' do
+  
+        cool_item = create(:item, name: "rings")
+        create_list(:item, 3, name: "shoes")
+        not_cool_item = create(:item, name: "springs")
+        search_name = "fire"
+  
+        get "/api/v1/items/find_all?name=#{search_name}"
+
+        expect(response).to be_successful
+
+        expect(json[:data]).to eq([])
+      end
+    end
+  end
+
   describe 'min/max item price search' do
-    describe 'min item price search' do
-      it 'find an item based on min search params results in alpha order' do
+    describe 'min item price search one' do
+      it 'finds an item based on min search params results in alpha order' do
         cool_item = create(:item, name: "Andrew's thing", unit_price: "50.00")
         create_list(:item, 3, name: "freds things", unit_price: "100.00")
         not_cool_item = create(:item, name: "Aaron's thing", unit_price: "49.99")
