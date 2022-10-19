@@ -37,6 +37,22 @@ class Api::V1::ItemsController < ApplicationController
     end
   end
 
+  def find_all
+    if params[:name] && (params[:min_price] || params[:max_price])
+      name_and_price_error
+    elsif params_present?(params[:name])
+      item = ::Item.find_by_name(params[:name], 'all')
+      render json: ItemSerializer.new(item)
+    elsif params_present?(params[:min_price], params[:max_price])
+      return negative_number_error if ::Item.negative_prices?(params[:min_price], params[:max_price])
+
+      item = ::Item.find_by_price(params[:min_price], params[:max_price], 'all')
+      render json: ItemSerializer.new(item)
+    else
+      empty_params_error
+    end
+  end
+
   private
 
   def params_present?(param1, param2=nil)

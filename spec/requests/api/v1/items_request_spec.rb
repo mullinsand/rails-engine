@@ -170,6 +170,25 @@ describe 'Items API' do
 
       expect(response).to have_http_status(201)
     end
+
+    # context 'attributes missing' do
+    #   it 'returns a 400 and error message' do
+    #     merchant1 = create(:merchant)
+
+    #     item_params = ({
+    #       name: "thing",
+    #       description: "the best thing eva",
+    #       merchant_id: merchant1.id
+    #     })
+    #     headers = {"CONTENT_TYPE" => "application/json"}
+
+    #     post '/api/v1/items', headers: headers, params: JSON.generate(item: item_params)
+
+    #     expect(response).to have_http_status(400)
+    #     require 'pry'; binding.pry
+    #     expect(json[:errors]).to eq('No results matched your search')
+    #   end
+    # end
   end
 
 
@@ -235,8 +254,6 @@ describe 'Items API' do
     end
   end
 
-
-
   describe 'single item search' do
     it 'find an item based on name search params results in alpha order' do
       cool_item = create(:item, name: "rings")
@@ -284,9 +301,57 @@ describe 'Items API' do
     end
   end
 
+  describe 'all item search' do
+    it 'find all items based on name search params results in alpha order' do
+      cool_item = create(:item, name: "rings")
+      create_list(:item, 3, name: "shoes")
+      not_cool_item = create(:item, name: "springs")
+      search_name = "ring"
+
+      get "/api/v1/items/find_all?name=#{search_name}"
+
+      expect(response).to be_successful
+      expect(json[:data].count).to eq(2)
+      json[:data].each do |item|
+        expect(item).to be_a(Hash)
+        expect(item).to have_key(:id)
+        # expect(item[:attributes][:id]).to be_an(Integer)
+
+        expect(item[:attributes]).to have_key(:name)
+        expect(item[:attributes][:name]).to be_a(String)
+        expect(item[:attributes][:name]).to_not eq('shoes')
+
+        expect(item[:attributes]).to have_key(:description)
+        expect(item[:attributes][:description]).to be_a(String)
+
+        expect(item[:attributes]).to have_key(:unit_price)
+        expect(item[:attributes][:unit_price]).to be_a(Float)
+
+        expect(item[:attributes]).to have_key(:merchant_id)
+        expect(item[:attributes][:merchant_id]).to be_an(Integer)
+      end
+    end
+
+    context 'if item search returns no results' do  
+      it 'returns a 200 with a message' do
+  
+        cool_item = create(:item, name: "rings")
+        create_list(:item, 3, name: "shoes")
+        not_cool_item = create(:item, name: "springs")
+        search_name = "fire"
+  
+        get "/api/v1/items/find_all?name=#{search_name}"
+
+        expect(response).to be_successful
+
+        expect(json[:data]).to eq([])
+      end
+    end
+  end
+
   describe 'min/max item price search' do
-    describe 'min item price search' do
-      it 'find an item based on min search params results in alpha order' do
+    describe 'min item price search one' do
+      it 'finds an item based on min search params results in alpha order' do
         cool_item = create(:item, name: "Andrew's thing", unit_price: "50.00")
         create_list(:item, 3, name: "freds things", unit_price: "100.00")
         not_cool_item = create(:item, name: "Aaron's thing", unit_price: "49.99")
@@ -328,9 +393,56 @@ describe 'Items API' do
 
         end
       end
+
+      describe 'min item price search all' do
+        it 'finds all items based on min search params results in alpha order' do
+          cool_item = create(:item, name: "Andrew's thing", unit_price: "50.00")
+          create_list(:item, 3, name: "freds things", unit_price: "100.00")
+          not_cool_item = create(:item, name: "Aaron's thing", unit_price: "49.99")
+          search_unit_price = "50.00"
+  
+          get "/api/v1/items/find_all?min_price=#{search_unit_price}"
+  
+          expect(response).to be_successful
+  
+          expect(json[:data].count).to eq(4)
+          json[:data].each do |item|
+            expect(item).to be_a(Hash)
+            expect(item).to have_key(:id)
+            # expect(item[:attributes][:id]).to be_an(Integer)
+
+            expect(item[:attributes]).to have_key(:name)
+            expect(item[:attributes][:name]).to be_a(String)
+            expect(item[:attributes][:name]).to_not eq("Aaron's thing")
+
+            expect(item[:attributes]).to have_key(:description)
+            expect(item[:attributes][:description]).to be_a(String)
+
+            expect(item[:attributes]).to have_key(:unit_price)
+            expect(item[:attributes][:unit_price]).to be_a(Float)
+
+            expect(item[:attributes]).to have_key(:merchant_id)
+            expect(item[:attributes][:merchant_id]).to be_an(Integer)
+          end
+        end
+  
+        context 'if item search returns no results' do  
+          it 'returns a 200 with an array' do
+    
+            search_unit_price = "50.00"
+    
+            get "/api/v1/items/find_all?min_price=#{search_unit_price}"
+    
+            expect(response).to be_successful
+    
+            expect(json[:data]).to eq([])
+  
+          end
+        end
+      end
     end
 
-    describe 'max item price search' do
+    describe 'max item price search one' do
       it 'find an item based on max search params results in alpha order' do
         cool_item = create(:item, name: "Andrew's thing", unit_price: "49.99")
         create_list(:item, 3, name: "freds things", unit_price: "40.00")
@@ -374,7 +486,54 @@ describe 'Items API' do
       end
     end
 
-    describe 'max/min item price search' do
+    describe 'max item price search all' do
+      it 'finds all items based on max search params results in alpha order' do
+        cool_item = create(:item, name: "Andrew's thing", unit_price: "49.99")
+        create_list(:item, 3, name: "freds things", unit_price: "40.00")
+        not_cool_item = create(:item, name: "Aaron's thing", unit_price: "50.01")
+        search_unit_price = "50.00"
+
+        get "/api/v1/items/find_all?max_price=#{search_unit_price}"
+
+        expect(response).to be_successful
+
+        expect(json[:data].count).to eq(4)
+        json[:data].each do |item|
+          expect(item).to be_a(Hash)
+          expect(item).to have_key(:id)
+          # expect(item[:attributes][:id]).to be_an(Integer)
+
+          expect(item[:attributes]).to have_key(:name)
+          expect(item[:attributes][:name]).to be_a(String)
+          expect(item[:attributes][:name]).to_not eq("Aaron's thing")
+
+          expect(item[:attributes]).to have_key(:description)
+          expect(item[:attributes][:description]).to be_a(String)
+
+          expect(item[:attributes]).to have_key(:unit_price)
+          expect(item[:attributes][:unit_price]).to be_a(Float)
+
+          expect(item[:attributes]).to have_key(:merchant_id)
+          expect(item[:attributes][:merchant_id]).to be_an(Integer)
+        end
+      end
+
+      context 'if item search returns no results' do  
+        it 'returns a 200 with an array' do
+  
+          search_unit_price = "50.00"
+  
+          get "/api/v1/items/find_all?max_price=#{search_unit_price}"
+  
+          expect(response).to be_successful
+  
+          expect(json[:data]).to eq([])
+
+        end
+      end
+    end
+
+    describe 'max/min item price search one' do
       it 'find an item based on max and min search params results in alpha order' do
         cool_item = create(:item, name: "Andrew's thing", unit_price: "50.00")
         create_list(:item, 3, name: "freds things", unit_price: "50.00")
@@ -440,6 +599,92 @@ describe 'Items API' do
 
           expect(response.status).to eq(400)
           expect(json[:errors]).to eq('No params listed in search')
+        end
+      end
+
+      context 'if name and price params are present' do  
+        it 'returns an error message' do
+  
+          search_unit_price = ""
+          search_name = "bob"
+  
+          get "/api/v1/items/find?max_price=#{search_unit_price}&name=#{search_name}"
+
+          expect(response.status).to eq(400)
+          expect(json[:errors]).to eq('Name and price cannot be used on the same request')
+        end
+      end
+    end
+
+    describe 'max/min item price search all' do
+      it 'finds all items based on min/max search params results in alpha order' do
+        cool_item = create(:item, name: "Andrew's thing", unit_price: "50.00")
+        create_list(:item, 3, name: "freds things", unit_price: "50.00")
+        not_cool_item = create(:item, name: "Aaron's thing", unit_price: "50.02")
+        search_min_unit_price = "50.00"
+        search_max_unit_price = "50.00"
+
+        get "/api/v1/items/find_all?max_price=#{search_max_unit_price}&min_price=#{search_min_unit_price}"
+
+        expect(response).to be_successful
+
+        expect(json[:data].count).to eq(4)
+        json[:data].each do |item|
+          expect(item).to be_a(Hash)
+          expect(item).to have_key(:id)
+          # expect(item[:attributes][:id]).to be_an(Integer)
+
+          expect(item[:attributes]).to have_key(:name)
+          expect(item[:attributes][:name]).to be_a(String)
+          expect(item[:attributes][:name]).to_not eq("Aaron's thing")
+
+          expect(item[:attributes]).to have_key(:description)
+          expect(item[:attributes][:description]).to be_a(String)
+
+          expect(item[:attributes]).to have_key(:unit_price)
+          expect(item[:attributes][:unit_price]).to be_a(Float)
+
+          expect(item[:attributes]).to have_key(:merchant_id)
+          expect(item[:attributes][:merchant_id]).to be_an(Integer)
+        end
+      end
+
+      context 'if item search returns no results' do  
+        it 'returns a 200 with a message' do
+  
+          search_min_unit_price = "50.00"
+          search_max_unit_price = "50.00"
+  
+          get "/api/v1/items/find_all?max_price=#{search_max_unit_price}&min_price=#{search_min_unit_price}"
+
+          expect(response).to be_successful
+  
+          expect(json[:data]).to eq([])
+        end
+      end
+
+      context 'if min/max price are not present' do  
+        it 'returns an error message' do
+  
+          search_unit_price = ""
+  
+          get "/api/v1/items/find_all?max_price=#{search_unit_price}"
+
+          expect(response.status).to eq(400)
+          expect(json[:errors]).to eq('No params listed in search')
+        end
+      end
+
+      context 'if name and price params are present' do  
+        it 'returns an error message' do
+  
+          search_unit_price = ""
+          search_name = "bob"
+  
+          get "/api/v1/items/find_all?max_price=#{search_unit_price}&name=#{search_name}"
+
+          expect(response.status).to eq(400)
+          expect(json[:errors]).to eq('Name and price cannot be used on the same request')
         end
       end
     end
