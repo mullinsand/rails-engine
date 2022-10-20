@@ -1,10 +1,9 @@
 class Api::V1::Items::SearchController < ApplicationController
   include ExceptionHandler
+  before_action :name_and_price?
 
   def find
-    if params[:name] && (params[:min_price] || params[:max_price])
-      name_and_price_error
-    elsif params_present?(params[:name])
+    if params_present?(params[:name])
       item = Item.find_by_name(params[:name])
       item ? (render json: ItemSerializer.new(item)) : no_search_results
     elsif params_present?(params[:min_price], params[:max_price])
@@ -19,9 +18,7 @@ class Api::V1::Items::SearchController < ApplicationController
   end
 
   def find_all
-    if params[:name] && (params[:min_price] || params[:max_price])
-      name_and_price_error
-    elsif params_present?(params[:name])
+    if params_present?(params[:name])
       item = Item.find_by_name(params[:name], 'all')
       render json: ItemSerializer.new(item)
     elsif params_present?(params[:min_price], params[:max_price])
@@ -37,13 +34,17 @@ class Api::V1::Items::SearchController < ApplicationController
 
   private
 
+  def name_and_price?
+    return name_and_price_error if params[:name] && (params[:min_price] || params[:max_price])
+  end
+
   def params_present?(param1, param2=nil)
     ![nil, ""].include?(param1) || ![nil, ""].include?(param2)
   end
 
   def min_greater_than_max?(min, max)
     return false if min.nil? || max.nil?
-    
+
     min.to_i > max.to_i
   end
 end

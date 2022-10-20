@@ -32,6 +32,6 @@ module ExceptionHandler
   end
 
   def no_search_results
-    render json: { data: { message: 'No results matched your search' } }, status: 200
+    render json: { data: {} }, status: 200
   end
 end

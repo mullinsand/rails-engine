@@ -12,7 +12,7 @@ class Item < ApplicationRecord
 
   def self.find_by_name(string, condition = 'one')
     search_results = where("name ILIKE ?", "%#{string}%").order(:name)
-    condition == 'all' ? search_results : search_results.limit(1).first
+    condition == 'all' ? search_results : search_results.first
   end
 
   def self.find_by_price(min_price, max_price, condition = 'one')
@@ -20,7 +20,7 @@ class Item < ApplicationRecord
     max_price ||= Float::INFINITY
 
     search_results = where("unit_price >= ? and unit_price <= ?", min_price, max_price).order(:name)
-    condition == 'all' ? search_results : search_results.limit(1).first
+    condition == 'all' ? search_results : search_results.first
   end
 
   def self.negative_prices?(min_price, max_price)

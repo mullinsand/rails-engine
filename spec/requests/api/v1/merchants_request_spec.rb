@@ -216,7 +216,7 @@ describe 'Merchants API' do
 
         expect(response).to be_successful
 
-        expect(json[:data][:message]).to eq('No results matched your search')
+        expect(json[:data]).to eq({})
       end
     end
 

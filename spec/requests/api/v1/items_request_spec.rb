@@ -319,7 +319,7 @@ describe 'Items API' do
 
         expect(response).to be_successful
 
-        expect(json[:data][:message]).to eq('No results matched your search')
+        expect(json[:data]).to eq({})
       end
     end
   end
@@ -412,7 +412,7 @@ describe 'Items API' do
   
           expect(response).to be_successful
   
-          expect(json[:data][:message]).to eq('No results matched your search')
+          expect(json[:data]).to eq({})
 
         end
       end
@@ -504,7 +504,7 @@ describe 'Items API' do
   
           expect(response).to be_successful
   
-          expect(json[:data][:message]).to eq('No results matched your search')
+          expect(json[:data]).to eq({})
         end
       end
     end
@@ -597,7 +597,7 @@ describe 'Items API' do
 
           expect(response).to be_successful
   
-          expect(json[:data][:message]).to eq('No results matched your search')
+          expect(json[:data]).to eq({})
         end
       end
 
@@ -763,49 +763,50 @@ describe 'Items API' do
 
       context 'if just results per page params sent' do
         it 'defaults to page 1' do
-          # first_item = create(:item, name: "a thingamajig")
-          # create_list(:item, 18)
-          # last_item = create(:item)
-          # page = ""
-          # per_page = ""
+          first_item = create(:item, name: "a thingamajig")
+          create_list(:item, 47)
+          last_item = create(:item)
+          per_page = 49
 
-          # get "/api/v1/items?page=#{page}&per_page=#{per_page}"
+          get "/api/v1/items?per_page=#{per_page}"
 
-          # expect(json[:data].count).to eq(20)
-          # expect(json[:data].first[:attributes][:name]).to eq(first_item.name)
-          # expect(json[:data].last[:attributes][:name]).to eq(last_item.name)
+          expect(json[:data].count).to eq(49)
+          expect(json[:data].first[:attributes][:name]).to eq(first_item.name)
+          expect(json[:data].last[:attributes][:name]).to eq(last_item.name)
         end
       end
 
       context 'if both results_per_page and page params sent' do
-        it 'returns results following those specs' do
-          # first_item = create(:item, name: "a thingamajig")
-          # create_list(:item, 18)
-          # last_item = create(:item)
-          # page = ""
-          # per_page = ""
+        it 'returns results following those params' do
+          create_list(:item, 15)
+          first_item = create(:item, name: "a thingamajig")
+          create_list(:item, 13)
+          last_item = create(:item)
+          page = 2
+          per_page = 15
 
-          # get "/api/v1/items?page=#{page}&per_page=#{per_page}"
+          get "/api/v1/items?page=#{page}&per_page=#{per_page}"
 
-          # expect(json[:data].count).to eq(20)
-          # expect(json[:data].first[:attributes][:name]).to eq(first_item.name)
-          # expect(json[:data].last[:attributes][:name]).to eq(last_item.name)
+          expect(json[:data].count).to eq(15)
+          expect(json[:data].first[:attributes][:name]).to eq(first_item.name)
+          expect(json[:data].last[:attributes][:name]).to eq(last_item.name)
         end
       end
 
-      context 'if both results_per_page and page params sent' do
-        it 'returns results following those specs' do
-          # first_item = create(:item, name: "a thingamajig")
-          # create_list(:item, 18)
-          # last_item = create(:item)
-          # page = ""
-          # per_page = ""
+      context 'if results window is less than results_per_page' do
+        it 'returns results less than the results per page' do
+          create_list(:item, 17)
+          first_item = create(:item, name: "a thingamajig")
+          create_list(:item, 11)
+          last_item = create(:item)
+          page = 2
+          per_page = 17
 
-          # get "/api/v1/items?page=#{page}&per_page=#{per_page}"
+          get "/api/v1/items?page=#{page}&per_page=#{per_page}"
 
-          # expect(json[:data].count).to eq(20)
-          # expect(json[:data].first[:attributes][:name]).to eq(first_item.name)
-          # expect(json[:data].last[:attributes][:name]).to eq(last_item.name)
+          expect(json[:data].count).to eq(13)
+          expect(json[:data].first[:attributes][:name]).to eq(first_item.name)
+          expect(json[:data].last[:attributes][:name]).to eq(last_item.name)
         end
       end
     end
