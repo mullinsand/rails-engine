@@ -1,8 +1,10 @@
 class Api::V1::ItemsController < ApplicationController
   include ExceptionHandler
+  include Pagination
 
   def index
-    render json: ItemSerializer.new(Item.all)
+    paginated_results = paginate(Item.all, params[:per_page], params[:page])
+    render json: ItemSerializer.new(paginated_results)
   end
 
   def show

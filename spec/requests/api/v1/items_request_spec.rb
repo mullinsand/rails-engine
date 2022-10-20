@@ -319,7 +319,7 @@ describe 'Items API' do
 
         expect(response).to be_successful
 
-        expect(json[:data][:message]).to eq('No results matched your search')
+        expect(json[:data]).to eq({})
       end
     end
   end
@@ -412,7 +412,7 @@ describe 'Items API' do
   
           expect(response).to be_successful
   
-          expect(json[:data][:message]).to eq('No results matched your search')
+          expect(json[:data]).to eq({})
 
         end
       end
@@ -504,7 +504,7 @@ describe 'Items API' do
   
           expect(response).to be_successful
   
-          expect(json[:data][:message]).to eq('No results matched your search')
+          expect(json[:data]).to eq({})
         end
       end
     end
@@ -597,7 +597,7 @@ describe 'Items API' do
 
           expect(response).to be_successful
   
-          expect(json[:data][:message]).to eq('No results matched your search')
+          expect(json[:data]).to eq({})
         end
       end
 
@@ -609,7 +609,7 @@ describe 'Items API' do
           get "/api/v1/items/find?max_price=#{search_unit_price}"
 
           expect(response.status).to eq(400)
-          expect(json[:errors]).to eq('Prices must be greater than or equal to zero')
+          expect(json[:errors]).to eq(['Prices must be greater than or equal to zero'])
         end
       end
 
@@ -621,7 +621,7 @@ describe 'Items API' do
           get "/api/v1/items/find?max_price=#{search_unit_price}"
 
           expect(response.status).to eq(400)
-          expect(json[:errors]).to eq('No params listed in search')
+          expect(json[:errors]).to eq(['No params listed in search'])
         end
       end
 
@@ -634,7 +634,7 @@ describe 'Items API' do
           get "/api/v1/items/find?max_price=#{search_unit_price}&name=#{search_name}"
 
           expect(response.status).to eq(400)
-          expect(json[:errors]).to eq('Name and price cannot be used on the same request')
+          expect(json[:errors]).to eq(['Name and price cannot be used on the same request'])
         end
       end
 
@@ -647,7 +647,7 @@ describe 'Items API' do
           get "/api/v1/items/find_all?max_price=#{search_max_unit_price}&min_price=#{search_min_unit_price}"
 
           expect(response.status).to eq(400)
-          expect(json[:errors]).to eq('Price minimum must be greater than maximum')
+          expect(json[:errors]).to eq(['Price minimum must be greater than maximum'])
         end
       end
     end
@@ -707,7 +707,7 @@ describe 'Items API' do
           get "/api/v1/items/find_all?max_price=#{search_unit_price}"
 
           expect(response.status).to eq(400)
-          expect(json[:errors]).to eq('No params listed in search')
+          expect(json[:errors]).to eq(['No params listed in search'])
         end
       end
 
@@ -720,7 +720,108 @@ describe 'Items API' do
           get "/api/v1/items/find_all?max_price=#{search_unit_price}&name=#{search_name}"
 
           expect(response.status).to eq(400)
-          expect(json[:errors]).to eq('Name and price cannot be used on the same request')
+          expect(json[:errors]).to eq(['Name and price cannot be used on the same request'])
+        end
+      end
+    end
+  end
+
+  describe 'pagination of all items response' do
+    describe 'renders one page at a time' do
+      context 'if no page params sent' do
+        it 'defaults to page 1 with 20 results' do
+          first_item = create(:item, name: "a thingamajig")
+          create_list(:item, 18)
+          last_item = create(:item)
+          page = ""
+          per_page = ""
+
+          get "/api/v1/items?page=#{page}&per_page=#{per_page}"
+
+          expect(json[:data].count).to eq(20)
+          expect(json[:data].first[:attributes][:name]).to eq(first_item.name)
+          expect(json[:data].last[:attributes][:name]).to eq(last_item.name)
+        end
+      end
+
+      context 'if just page params sent' do
+        it 'defaults to 20 results per page' do
+          create_list(:item, 60)
+          first_item = create(:item, name: "a thingamajig")
+          create_list(:item, 18)
+          last_item = create(:item)
+          page = 4
+
+
+          get "/api/v1/items?page=#{page}"
+
+          expect(json[:data].count).to eq(20)
+          expect(json[:data].first[:attributes][:name]).to eq(first_item.name)
+          expect(json[:data].last[:attributes][:name]).to eq(last_item.name)
+        end
+      end
+
+      context 'if just results per page params sent' do
+        it 'defaults to page 1' do
+          first_item = create(:item, name: "a thingamajig")
+          create_list(:item, 47)
+          last_item = create(:item)
+          per_page = 49
+
+          get "/api/v1/items?per_page=#{per_page}"
+
+          expect(json[:data].count).to eq(49)
+          expect(json[:data].first[:attributes][:name]).to eq(first_item.name)
+          expect(json[:data].last[:attributes][:name]).to eq(last_item.name)
+        end
+      end
+
+      context 'if both results_per_page and page params sent' do
+        it 'returns results following those params' do
+          create_list(:item, 15)
+          first_item = create(:item, name: "a thingamajig")
+          create_list(:item, 13)
+          last_item = create(:item)
+          page = 2
+          per_page = 15
+
+          get "/api/v1/items?page=#{page}&per_page=#{per_page}"
+
+          expect(json[:data].count).to eq(15)
+          expect(json[:data].first[:attributes][:name]).to eq(first_item.name)
+          expect(json[:data].last[:attributes][:name]).to eq(last_item.name)
+        end
+      end
+
+      context 'if results window is less than results_per_page' do
+        it 'returns results less than the results per page' do
+          create_list(:item, 17)
+          first_item = create(:item, name: "a thingamajig")
+          create_list(:item, 11)
+          last_item = create(:item)
+          page = 2
+          per_page = 17
+
+          get "/api/v1/items?page=#{page}&per_page=#{per_page}"
+
+          expect(json[:data].count).to eq(13)
+          expect(json[:data].first[:attributes][:name]).to eq(first_item.name)
+          expect(json[:data].last[:attributes][:name]).to eq(last_item.name)
+        end
+      end
+
+      context 'if no results match the page and results params' do
+        it 'returns an empty array' do
+          create_list(:item, 17)
+          first_item = create(:item, name: "a thingamajig")
+          create_list(:item, 11)
+          last_item = create(:item)
+          page = 15
+          per_page = 17
+
+          get "/api/v1/items?page=#{page}&per_page=#{per_page}"
+
+          expect(json[:data].empty?).to eq(true)
         end
       end
     end
