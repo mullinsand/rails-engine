@@ -1,7 +1,10 @@
 class Api::V1::MerchantsController < ApplicationController
   include ExceptionHandler
+  include Pagination
+  
   def index
-    render json: MerchantSerializer.new(Merchant.all)
+    paginated_results = paginate(Merchant.all, params[:per_page], params[:page])
+    render json: MerchantSerializer.new(paginated_results)
   end
 
   def show

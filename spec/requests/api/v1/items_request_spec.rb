@@ -809,6 +809,21 @@ describe 'Items API' do
           expect(json[:data].last[:attributes][:name]).to eq(last_item.name)
         end
       end
+
+      context 'if no results match the page and results params' do
+        it 'returns an empty array' do
+          create_list(:item, 17)
+          first_item = create(:item, name: "a thingamajig")
+          create_list(:item, 11)
+          last_item = create(:item)
+          page = 15
+          per_page = 17
+
+          get "/api/v1/items?page=#{page}&per_page=#{per_page}"
+
+          expect(json[:data].empty?).to eq(true)
+        end
+      end
     end
   end
 end
