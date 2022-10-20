@@ -725,4 +725,89 @@ describe 'Items API' do
       end
     end
   end
+
+  describe 'pagination of all items response' do
+    describe 'renders one page at a time' do
+      context 'if no page params sent' do
+        it 'defaults to page 1 with 20 results' do
+          first_item = create(:item, name: "a thingamajig")
+          create_list(:item, 18)
+          last_item = create(:item)
+          page = ""
+          per_page = ""
+
+          get "/api/v1/items?page=#{page}&per_page=#{per_page}"
+
+          expect(json[:data].count).to eq(20)
+          expect(json[:data].first[:attributes][:name]).to eq(first_item.name)
+          expect(json[:data].last[:attributes][:name]).to eq(last_item.name)
+        end
+      end
+
+      context 'if just page params sent' do
+        it 'defaults to 20 results per page' do
+          create_list(:item, 60)
+          first_item = create(:item, name: "a thingamajig")
+          create_list(:item, 18)
+          last_item = create(:item)
+          page = 4
+
+
+          get "/api/v1/items?page=#{page}"
+
+          expect(json[:data].count).to eq(20)
+          expect(json[:data].first[:attributes][:name]).to eq(first_item.name)
+          expect(json[:data].last[:attributes][:name]).to eq(last_item.name)
+        end
+      end
+
+      context 'if just results per page params sent' do
+        it 'defaults to page 1' do
+          # first_item = create(:item, name: "a thingamajig")
+          # create_list(:item, 18)
+          # last_item = create(:item)
+          # page = ""
+          # per_page = ""
+
+          # get "/api/v1/items?page=#{page}&per_page=#{per_page}"
+
+          # expect(json[:data].count).to eq(20)
+          # expect(json[:data].first[:attributes][:name]).to eq(first_item.name)
+          # expect(json[:data].last[:attributes][:name]).to eq(last_item.name)
+        end
+      end
+
+      context 'if both results_per_page and page params sent' do
+        it 'returns results following those specs' do
+          # first_item = create(:item, name: "a thingamajig")
+          # create_list(:item, 18)
+          # last_item = create(:item)
+          # page = ""
+          # per_page = ""
+
+          # get "/api/v1/items?page=#{page}&per_page=#{per_page}"
+
+          # expect(json[:data].count).to eq(20)
+          # expect(json[:data].first[:attributes][:name]).to eq(first_item.name)
+          # expect(json[:data].last[:attributes][:name]).to eq(last_item.name)
+        end
+      end
+
+      context 'if both results_per_page and page params sent' do
+        it 'returns results following those specs' do
+          # first_item = create(:item, name: "a thingamajig")
+          # create_list(:item, 18)
+          # last_item = create(:item)
+          # page = ""
+          # per_page = ""
+
+          # get "/api/v1/items?page=#{page}&per_page=#{per_page}"
+
+          # expect(json[:data].count).to eq(20)
+          # expect(json[:data].first[:attributes][:name]).to eq(first_item.name)
+          # expect(json[:data].last[:attributes][:name]).to eq(last_item.name)
+        end
+      end
+    end
+  end
 end
