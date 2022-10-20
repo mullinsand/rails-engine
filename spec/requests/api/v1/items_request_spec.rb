@@ -609,7 +609,7 @@ describe 'Items API' do
           get "/api/v1/items/find?max_price=#{search_unit_price}"
 
           expect(response.status).to eq(400)
-          expect(json[:errors]).to eq('Prices must be greater than or equal to zero')
+          expect(json[:errors]).to eq(['Prices must be greater than or equal to zero'])
         end
       end
 
@@ -621,7 +621,7 @@ describe 'Items API' do
           get "/api/v1/items/find?max_price=#{search_unit_price}"
 
           expect(response.status).to eq(400)
-          expect(json[:errors]).to eq('No params listed in search')
+          expect(json[:errors]).to eq(['No params listed in search'])
         end
       end
 
@@ -634,7 +634,7 @@ describe 'Items API' do
           get "/api/v1/items/find?max_price=#{search_unit_price}&name=#{search_name}"
 
           expect(response.status).to eq(400)
-          expect(json[:errors]).to eq('Name and price cannot be used on the same request')
+          expect(json[:errors]).to eq(['Name and price cannot be used on the same request'])
         end
       end
 
@@ -647,7 +647,7 @@ describe 'Items API' do
           get "/api/v1/items/find_all?max_price=#{search_max_unit_price}&min_price=#{search_min_unit_price}"
 
           expect(response.status).to eq(400)
-          expect(json[:errors]).to eq('Price minimum must be greater than maximum')
+          expect(json[:errors]).to eq(['Price minimum must be greater than maximum'])
         end
       end
     end
@@ -707,7 +707,7 @@ describe 'Items API' do
           get "/api/v1/items/find_all?max_price=#{search_unit_price}"
 
           expect(response.status).to eq(400)
-          expect(json[:errors]).to eq('No params listed in search')
+          expect(json[:errors]).to eq(['No params listed in search'])
         end
       end
 
@@ -720,7 +720,7 @@ describe 'Items API' do
           get "/api/v1/items/find_all?max_price=#{search_unit_price}&name=#{search_name}"
 
           expect(response.status).to eq(400)
-          expect(json[:errors]).to eq('Name and price cannot be used on the same request')
+          expect(json[:errors]).to eq(['Name and price cannot be used on the same request'])
         end
       end
     end

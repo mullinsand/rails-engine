@@ -167,7 +167,7 @@ describe 'Merchants API' do
         get "/api/v1/merchants/find_all?name="
 
         expect(response.status).to eq(400)
-        expect(json[:errors]).to eq('No params listed in search')
+        expect(json[:errors]).to eq(['No params listed in search'])
       end
 
       it 'returns an empty array' do
@@ -175,7 +175,7 @@ describe 'Merchants API' do
         get "/api/v1/merchants/find_all?"
 
         expect(response.status).to eq(400)
-        expect(json[:errors]).to eq('No params listed in search')
+        expect(json[:errors]).to eq(['No params listed in search'])
       end
     end
   end
@@ -226,7 +226,7 @@ describe 'Merchants API' do
         get "/api/v1/merchants/find?name="
 
         expect(response.status).to eq(400)
-        expect(json[:errors]).to eq('No params listed in search')
+        expect(json[:errors]).to eq(['No params listed in search'])
       end
 
       it 'returns an empty array' do
@@ -234,7 +234,7 @@ describe 'Merchants API' do
         get "/api/v1/merchants/find?"
 
         expect(response.status).to eq(400)
-        expect(json[:errors]).to eq('No params listed in search')
+        expect(json[:errors]).to eq(['No params listed in search'])
       end
     end
   end

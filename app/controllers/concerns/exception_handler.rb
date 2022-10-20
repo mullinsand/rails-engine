@@ -12,6 +12,6 @@ module ExceptionHandler
   end
 
   def render_error(error, status)
-    render json: { errors: error }, status: status
+    render json: { message: 'your query could not be completed', errors: [error] }, status: status
   end
 end
