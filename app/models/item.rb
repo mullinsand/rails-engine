@@ -29,21 +29,11 @@ class Item < ApplicationRecord
     min_price.to_f.negative? || max_price.to_f.negative?
   end
 
-  def self.find_only_item_invoices(item_id)
-    find(item_id)
-      .invoices
-      .joins(:invoice_items)
-      .select('invoices.id, count(invoice_items.invoice_id = invoices.id) as item_count')
-      .group('invoices.id')
-      .having('count(invoice_items.invoice_id = invoices.id) = 1')
-      .pluck(:id)
-  end
-
   private
 
   def delete_only_item_invoices
-    only_item_invoices = Item.find_only_item_invoices(id)
+    item_invoices = invoices.pluck(:id)
     yield
-    Invoice.delete(only_item_invoices) unless only_item_invoices.empty?
+    Invoice.delete_only_item_invoices(item_invoices)
   end
 end
