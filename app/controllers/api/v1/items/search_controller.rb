@@ -1,6 +1,6 @@
 class Api::V1::Items::SearchController < ApplicationController
   include ExceptionHandler
-  before_action :name_and_price?
+  before_action :name_and_price_and_present
 
   def find
     if params_present?(params[:name])
@@ -34,8 +34,9 @@ class Api::V1::Items::SearchController < ApplicationController
 
   private
 
-  def name_and_price?
+  def name_and_price_and_present
     return name_and_price_error if params[:name] && (params[:min_price] || params[:max_price])
+    # return empty_params_error if params[:name]
   end
 
   def params_present?(param1, param2=nil)

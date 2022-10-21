@@ -11,6 +11,6 @@ module Pagination
     # check its an integer
     #
     start_point = results_per_page.to_i * (page.to_i - 1)
-    collection.offset(start_point).limit(results_per_page)
+    collection.order(:id).offset(start_point).limit(results_per_page)
   end
 end
