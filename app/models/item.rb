@@ -11,7 +11,7 @@ class Item < ApplicationRecord
   has_many :invoices, through: :invoice_items
 
   def self.find_by_name(string, condition = 'one')
-    search_results = where("name ILIKE ?", "%#{string}%").order(:name)
+    search_results = where('name ILIKE ?', "%#{string}%").order(:name)
     condition == 'all' ? search_results : search_results.first
   end
 
@@ -19,7 +19,7 @@ class Item < ApplicationRecord
     min_price ||= 0
     max_price ||= Float::INFINITY
 
-    search_results = where("unit_price >= ? and unit_price <= ?", min_price, max_price).order(:name)
+    search_results = where('unit_price >= ? and unit_price <= ?', min_price, max_price).order(:name)
     condition == 'all' ? search_results : search_results.first
   end
 

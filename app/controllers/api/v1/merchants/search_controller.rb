@@ -1,5 +1,6 @@
 class Api::V1::Merchants::SearchController < ApplicationController
   include ExceptionHandler
+  include ParamsSieve
   def find_all
     if params_present?(params[:name])
       merchants = Merchant.find_by_name(params[:name], 'all')
@@ -16,11 +17,5 @@ class Api::V1::Merchants::SearchController < ApplicationController
     else
       empty_params_error
     end
-  end
-
-  private
-
-  def params_present?(param)
-    ![nil, ''].include?(param)
   end
 end

@@ -1,6 +1,6 @@
 module Pagination
   def paginate(collection, results_per_page, page)
-    # return collection if 
+    # return collection if []
     results_per_page = 20 if [nil, "", 0].include?(results_per_page)
     page = 1 if [nil, "", 0].include?(page)
 
