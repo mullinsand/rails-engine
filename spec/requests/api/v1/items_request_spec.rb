@@ -267,6 +267,23 @@ describe 'Items API' do
       expect(Invoice.all).to_not include(invoice4)
     end
 
+    context 'if item is on one invoice multiple times' do
+      it 'deletes that invoice still' do
+        item1 = create(:item)
+        invoice1 = create(:invoice)
+        invoice2 = create(:invoice)
+        invoice3 = create(:invoice)
+        invoice4 = create(:invoice)
+        create(:invoice_item, item: item1, invoice: invoice1)
+        create(:invoice_item, item: item1, invoice: invoice1)
+        create(:invoice_item, item: item1, invoice: invoice1)
+
+        delete "/api/v1/items/#{item1.id}"
+
+        expect(Invoice.all).to_not include(invoice1)
+      end
+    end
+
     context 'if item does not exist' do  
       it 'returns a 404 status response' do
   

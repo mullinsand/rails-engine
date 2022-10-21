@@ -8,15 +8,11 @@ class Invoice < ApplicationRecord
 
   def self.find_only_item_invoices(item_invoices)
     left_joins(:invoice_items)
-      .where('invoices.id IN (?)', item_invoices)
-      .select('invoices.id, count(invoice_items.invoice_id = invoices.id) as item_count')
-      .group('invoices.id')
-      .having('count(invoice_items.invoice_id = invoices.id) = 0')
-      .pluck(:id)
+      .where('invoices.id IN (?) AND invoice_items.invoice_id IS NULL', item_invoices)
   end
 
   def self.delete_only_item_invoices(item_invoices)
-    invoice_ids = find_only_item_invoices(item_invoices)
-    delete(invoice_ids)
+    only_item_invoices = find_only_item_invoices(item_invoices)
+    delete(only_item_invoices)
   end
 end

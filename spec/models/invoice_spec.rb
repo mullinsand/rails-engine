@@ -24,8 +24,8 @@ RSpec.describe Invoice, type: :model do
             create(:invoice_item, item: item1, invoice: invoice2)
             create_list(:invoice_item, 2, invoice: invoice2)
 
-            expect(Invoice.find_only_item_invoices([invoice1.id, invoice2.id])).to eq([invoice1.id])
-            expect(Invoice.find_only_item_invoices([invoice1.id, invoice2.id])).to_not include(invoice2.id)
+            expect(Invoice.find_only_item_invoices([invoice1.id, invoice2.id])).to eq([invoice1])
+            expect(Invoice.find_only_item_invoices([invoice1.id, invoice2.id])).to_not include(invoice2)
           end
         end
 
@@ -40,8 +40,8 @@ RSpec.describe Invoice, type: :model do
             create(:invoice_item, item: item1, invoice: invoice2)
             create_list(:invoice_item, 2, invoice: invoice2)
 
-            expect(Invoice.find_only_item_invoices([invoice1.id, invoice2.id, invoice3.id, invoice4.id])).to eq([invoice1.id, invoice3.id, invoice4.id])
-            expect(Invoice.find_only_item_invoices([invoice1.id, invoice2.id, invoice3.id, invoice4.id])).to_not include(invoice2.id)
+            expect(Invoice.find_only_item_invoices([invoice1.id, invoice2.id, invoice3.id, invoice4.id])).to eq([invoice1, invoice3, invoice4])
+            expect(Invoice.find_only_item_invoices([invoice1.id, invoice2.id, invoice3.id, invoice4.id])).to_not include(invoice2)
           end
         end
 
