@@ -267,6 +267,23 @@ describe 'Items API' do
       expect(Invoice.all).to_not include(invoice4)
     end
 
+    context 'if item is on one invoice multiple times' do
+      it 'deletes that invoice still' do
+        item1 = create(:item)
+        invoice1 = create(:invoice)
+        invoice2 = create(:invoice)
+        invoice3 = create(:invoice)
+        invoice4 = create(:invoice)
+        create(:invoice_item, item: item1, invoice: invoice1)
+        create(:invoice_item, item: item1, invoice: invoice1)
+        create(:invoice_item, item: item1, invoice: invoice1)
+
+        delete "/api/v1/items/#{item1.id}"
+
+        expect(Invoice.all).to_not include(invoice1)
+      end
+    end
+
     context 'if item does not exist' do  
       it 'returns a 404 status response' do
   
@@ -625,6 +642,18 @@ describe 'Items API' do
         end
       end
 
+      context 'if no params specified' do  
+        it 'returns an error message' do
+  
+          search_unit_price = ""
+  
+          get "/api/v1/items/find"
+
+          expect(response.status).to eq(400)
+          expect(json[:errors]).to eq(['No params listed in search'])
+        end
+      end
+
       context 'if name and price params are present' do  
         it 'returns an error message' do
   
@@ -750,12 +779,14 @@ describe 'Items API' do
           first_item = create(:item, name: "a thingamajig")
           create_list(:item, 18)
           last_item = create(:item)
+          create_list(:item, 27)
           page = 4
 
 
           get "/api/v1/items?page=#{page}"
 
           expect(json[:data].count).to eq(20)
+
           expect(json[:data].first[:attributes][:name]).to eq(first_item.name)
           expect(json[:data].last[:attributes][:name]).to eq(last_item.name)
         end
